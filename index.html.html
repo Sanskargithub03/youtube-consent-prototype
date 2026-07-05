@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>YouTube India - Consent Flow Prototype</title>
+<style>
+  :root{
+    --bg:#0f0f0f; --card:#181818; --card2:#1f1f1f; --red:#e62117; --red-soft:#3a1414;
+    --text:#f1f1f1; --muted:#aaaaaa; --line:#2b2b2b; --green:#2ba84a; --blue:#3ea6ff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#000; font-family:Roboto, -apple-system, Segoe UI, Arial, sans-serif;
+    display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px 12px;
+  }
+  .frame{
+    width:390px; height:780px; background:var(--bg); border-radius:36px; border:8px solid #111;
+    box-shadow:0 30px 60px rgba(0,0,0,.6); overflow:hidden; position:relative; color:var(--text);
+  }
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%); width:130px; height:22px;
+    background:#111; border-radius:0 0 14px 14px; z-index:20;
+  }
+  .screen{
+    position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .25s ease;
+    display:flex; flex-direction:column; padding-top:36px;
+  }
+  .screen.active{ opacity:1; pointer-events:auto; }
+  .topbar{
+    display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line);
+  }
+  .topbar .logo{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:17px; }
+  .logo .play{ width:22px; height:16px; background:var(--red); border-radius:5px; position:relative; }
+  .logo .play::after{
+    content:""; position:absolute; left:8px; top:3px; border-left:8px solid #fff;
+    border-top:5px solid transparent; border-bottom:5px solid transparent;
+  }
+  .content{ flex:1; overflow-y:auto; padding:20px 20px 24px; }
+  h1{ font-size:20px; margin:0 0 6px; font-weight:700; }
+  h2{ font-size:15px; margin:18px 0 8px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; font-weight:600;}
+  p.sub{ color:var(--muted); font-size:13px; line-height:1.5; margin:0 0 18px; }
+  .field{
+    background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    margin-bottom:12px; font-size:14px;
+  }
+  .field label{ display:block; font-size:11px; color:var(--muted); margin-bottom:4px; }
+  .field input, .field select{
+    background:transparent; border:none; color:var(--text); font-size:14px; width:100%; outline:none;
+  }
+  .btn{
+    display:block; width:100%; text-align:center; background:var(--red); color:#fff; border:none;
+    padding:13px; border-radius:22px; font-size:14.5px; font-weight:700; cursor:pointer; margin-top:8px;
+  }
+  .btn.secondary{ background:transparent; color:var(--text); border:1px solid #444; }
+  .btn.ghost{ background:transparent; color:var(--red); border:none; font-weight:600; padding:10px; }
+  .card{
+    background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px;
+  }
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .row .rt{ flex:1; }
+  .row .rt .t{ font-size:13.5px; font-weight:600; margin-bottom:2px; }
+  .row .rt .d{ font-size:11.5px; color:var(--muted); line-height:1.4; }
+  .toggle{
+    width:42px; height:24px; border-radius:12px; background:#3a3a3a; position:relative; cursor:pointer;
+    flex-shrink:0; transition:background .15s;
+  }
+  .toggle::after{
+    content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+    background:#ccc; transition:transform .15s, background .15s;
+  }
+  .toggle.on{ background:var(--red); }
+  .toggle.on::after{ transform:translateX(18px); background:#fff; }
+  .toggle.locked{ background:#555; cursor:not-allowed; }
+  .toggle.locked::after{ background:#999; }
+  .tag{
+    display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+    background:var(--red-soft); color:#ff8b7d; margin-left:6px; vertical-align:middle;
+  }
+  .tag.req{ background:#222; color:var(--muted); }
+  .avatar{
+    width:56px; height:56px; border-radius:50%; background:var(--blue); display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:22px; color:#0f0f0f; margin:0 auto 10px;
+  }
+  .center{ text-align:center; }
+  .check{
+    width:64px; height:64px; border-radius:50%; background:var(--green); display:flex; align-items:center;
+    justify-content:center; margin:20px auto 14px; font-size:30px;
+  }
+  .stat{ display:flex; gap:10px; }
+  .stat .box{ flex:1; background:var(--card2); border-radius:10px; padding:10px; text-align:center; }
+  .stat .box .n{ font-size:18px; font-weight:700; }
+  .stat .box .l{ font-size:10px; color:var(--muted); }
+  .progress{ display:flex; gap:5px; padding:0 20px 10px; }
+  .progress .seg{ flex:1; height:3px; border-radius:2px; background:#333; }
+  .progress .seg.done{ background:var(--red); }
+  .dim{ color:var(--muted); }
+  .home-fake{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px;
+  }
+  .vid{ background:var(--card2); border-radius:10px; overflow:hidden; }
+  .vid .thumb{ height:70px; background:linear-gradient(135deg,#222,#333); }
+  .vid .meta{ padding:8px; font-size:11px; }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="notch"></div>
+
+  <!-- SCREEN 1: SIGN UP -->
+  <div class="screen active" id="s1">
+    <div class="topbar"><div class="logo"><div class="play"></div>YouTube</div></div>
+    <div class="content">
+      <h1>Create your account</h1>
+      <p class="sub">Happy-path demo &middot; Vedantu PM case study &middot; Screen 1 of 6</p>
+
+      <div class="field"><label>Full name</label><input value="Aarav Sharma" readonly></div>
+      <div class="field"><label>Date of birth</label><input value="14 / 03 / 2011" readonly></div>
+      <div class="field"><label>Mobile number</label><input value="+91 9XXXXXXXXX" readonly></div>
+
+      <button class="btn" onclick="go('s2')">Continue</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: AGE FLAG -->
+  <div class="screen" id="s2">
+    <div class="topbar"><div class="logo"><div class="play"></div>YouTube</div></div>
+    <div class="content center">
+      <div class="avatar">15</div>
+      <h1>Let's set this up with a parent</h1>
+      <p class="sub">Based on the date of birth entered, this account is for someone under 18. In India, the DPDP Act requires a parent or guardian to give consent before we can collect and use this account's data.</p>
+      <div class="card" style="text-align:left">
+        <div class="row"><div class="rt"><div class="t">What happens next</div>
+        <div class="d">We'll ask a parent to review and approve exactly what data this account can share - nothing is collected until they do.</div></div></div>
+      </div>
+      <button class="btn" onclick="go('s3')">Invite a parent to continue</button>
+      <button class="btn ghost" onclick="go('s1')">Go back</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: PARENT CONSENT -->
+  <div class="screen" id="s3">
+    <div class="topbar"><div class="logo"><div class="play"></div>YouTube</div><span class="dim" style="font-size:11px;margin-left:auto">Parent view</span></div>
+    <div class="content">
+      <h1>Review & consent</h1>
+      <p class="sub">For <b style="color:#fff">Aarav's</b> account. Turn on only what you're comfortable with - the account works even if you leave some off.</p>
+
+      <h2>Required</h2>
+      <div class="card">
+        <div class="row">
+          <div class="rt"><div class="t">Core viewing service <span class="tag req">Required</span></div>
+          <div class="d">Lets Aarav watch and search videos. Can't be turned off.</div></div>
+          <div class="toggle on locked"></div>
+        </div>
+      </div>
+
+      <h2>Optional - you choose</h2>
+      <div class="card">
+        <div class="row" style="margin-bottom:14px;">
+          <div class="rt"><div class="t">Personalised recommendations</div>
+          <div class="d">Suggests videos based on Aarav's watch history.</div></div>
+          <div class="toggle on" onclick="toggle(this)"></div>
+        </div>
+        <div class="row" style="margin-bottom:14px;">
+          <div class="rt"><div class="t">Ad personalisation</div>
+          <div class="d">Uses activity data to choose which ads Aarav sees.</div></div>
+          <div class="toggle" onclick="toggle(this)"></div>
+        </div>
+        <div class="row">
+          <div class="rt"><div class="t">Sharing with 3rd-party partners</div>
+          <div class="d">Shares limited data with measurement partners.</div></div>
+          <div class="toggle" onclick="toggle(this)"></div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="go('s4')">Confirm & activate account</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: CONFIRMATION -->
+  <div class="screen" id="s4">
+    <div class="content center" style="padding-top:60px;">
+      <div class="check">&#10003;</div>
+      <h1>Supervised account is ready</h1>
+      <p class="sub">Aarav can now use YouTube. You can review, change, or withdraw this consent anytime from the Parent Dashboard.</p>
+      <button class="btn" onclick="go('s5')">Open Parent Dashboard</button>
+      <button class="btn secondary" onclick="go('s6h')">Continue as Aarav</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 6h: kid homefeed (happy path continuation) -->
+  <div class="screen" id="s6h">
+    <div class="topbar"><div class="logo"><div class="play"></div>YouTube</div><span class="dim" style="font-size:11px;margin-left:auto">Aarav's account</span></div>
+    <div class="content">
+      <h1>For you</h1>
+      <p class="sub">Recommendations are on, based on parent-approved settings.</p>
+      <div class="home-fake">
+        <div class="vid"><div class="thumb"></div><div class="meta">Building a paper rocket &middot; 2:14</div></div>
+        <div class="vid"><div class="thumb"></div><div class="meta">Class 9 Science - Light &middot; 8:02</div></div>
+        <div class="vid"><div class="thumb"></div><div class="meta">Football skills tutorial &middot; 5:40</div></div>
+        <div class="vid"><div class="thumb"></div><div class="meta">Lo-fi study beats &middot; 45:00</div></div>
+      </div>
+      <button class="btn secondary" style="margin-top:16px;" onclick="go('s5')">Switch to Parent Dashboard</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: PARENT DASHBOARD -->
+  <div class="screen" id="s5">
+    <div class="topbar"><div class="logo"><div class="play"></div>YouTube</div><span class="dim" style="font-size:11px;margin-left:auto">Parent Dashboard</span></div>
+    <div class="content">
+      <h1>Aarav's data & consent</h1>
+      <p class="sub">Everything collected under your consent, in one place.</p>
+
+      <div class="stat">
+        <div class="box"><div class="n">3</div><div class="l">Permissions on</div></div>
+        <div class="box"><div class="n">18d</div><div class="l">Since last review</div></div>
+        <div class="box"><div class="n">On</div><div class="l">Consent status</div></div>
+      </div>
+
+      <h2>What's collected</h2>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;"><div class="rt"><div class="t">Watch & search history</div><div class="d">Used for recommendations only</div></div></div>
+        <div class="row" style="margin-bottom:10px;"><div class="rt"><div class="t">Approximate location</div><div class="d">Used to show regional content</div></div></div>
+        <div class="row"><div class="rt"><div class="t">Device information</div><div class="d">Used to keep the account secure</div></div></div>
+      </div>
+
+      <h2>Manage this account</h2>
+      <div class="card" style="cursor:pointer" onclick="go('s7')">
+        <div class="row"><div class="rt"><div class="t">View or download Aarav's data</div><div class="d">Get a copy of everything stored</div></div><div class="dim">&rsaquo;</div></div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="go('s3')">
+        <div class="row"><div class="rt"><div class="t">Edit consent settings</div><div class="d">Change what's turned on</div></div><div class="dim">&rsaquo;</div></div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="go('s8')">
+        <div class="row"><div class="rt"><div class="t" style="color:#ff8b7d">Withdraw consent & delete data</div><div class="d">Removes optional data collection</div></div><div class="dim">&rsaquo;</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: DATA REQUEST SUCCESS -->
+  <div class="screen" id="s7">
+    <div class="content center" style="padding-top:60px;">
+      <div class="check">&#10003;</div>
+      <h1>Request received</h1>
+      <p class="sub">We're preparing Aarav's data export. You'll get a secure download link within 48 hours, as required under the DPDP Act.</p>
+      <button class="btn" onclick="go('s5')">Back to dashboard</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 8: WITHDRAW CONFIRM -->
+  <div class="screen" id="s8">
+    <div class="content center" style="padding-top:50px;">
+      <div class="check" style="background:var(--red)">&#33;</div>
+      <h1>Withdraw optional consent?</h1>
+      <p class="sub">Aarav will keep watching videos as normal. Recommendations, ad personalisation and data sharing will turn off, and existing optional data will be deleted.</p>
+      <button class="btn" onclick="go('s9')">Confirm withdrawal</button>
+      <button class="btn ghost" onclick="go('s5')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 9: WITHDRAWN CONFIRMATION -->
+  <div class="screen" id="s9">
+    <div class="content center" style="padding-top:60px;">
+      <div class="check">&#10003;</div>
+      <h1>Consent withdrawn</h1>
+      <p class="sub">Optional data collection is off and existing optional data has been deleted. Aarav's core viewing experience is unaffected.</p>
+      <button class="btn" onclick="go('s5')">Back to dashboard</button>
+      <button class="btn secondary" onclick="go('s1')">Restart demo</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function go(id){
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function toggle(el){
+    el.classList.toggle('on');
+  }
+</script>
+</body>
+</html>
