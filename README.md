@@ -80,7 +80,7 @@ See the [full deck](https://drive.google.com/file/d/1HEG81Q-_c09WlB9Om2Xq6aKGqFH
 ## 👤 Author
 
 **Sanskar** — ECE, IIIT Nagpur
-[LinkedIn](www.linkedin.com/in/sanskar-yede-b61798294) · [GitHub](https://github.com/sanskargithub03)
+[LinkedIn][(www.linkedin.com/in/sanskar-yede-b61798294](https://www.linkedin.com/in/sanskar-yede-b61798294)) · [GitHub](https://github.com/sanskargithub03)
 
 <br>
 
