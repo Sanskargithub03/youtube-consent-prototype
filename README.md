@@ -7,8 +7,13 @@
 **How should YouTube (India) handle personal data and consent for minors,**
 **in line with the Digital Personal Data Protection (DPDP) Act, 2023?**
 
-[![Live Prototype](https://img.shields.io/badge/🔗_Live_Prototype-View_Demo-e30613?style=for-the-badge)](https://sanskargithub03.github.io/youtube-consent-prototype/)
-[![Deck](https://img.shields.io/badge/📄_Product_Deck-Download-16213e?style=for-the-badge)](./YouTube_DPDP_Consent_Deck.pptx)
+<br>
+
+### 👉 [**CLICK HERE TO TRY THE LIVE PROTOTYPE**](https://sanskargithub03.github.io/youtube-consent-prototype/) 👈
+##### *Tap through the actual flow — sign-up → parent consent → dashboard → data rights*
+
+[![Live Prototype](https://img.shields.io/badge/🔴_LIVE_DEMO-Try_it_now-e30613?style=for-the-badge&labelColor=16213e)](https://sanskargithub03.github.io/youtube-consent-prototype/)
+[![Full Deck](https://img.shields.io/badge/📄_Full_Deck-View_on_Drive-4285F4?style=for-the-badge&labelColor=16213e)](https://drive.google.com/file/d/1HEG81Q-_c09WlB9Om2Xq6aKGqFH7gY9V/view?usp=sharing)
 
 ![Status](https://img.shields.io/badge/status-submitted-success?style=flat-square)
 ![Focus](https://img.shields.io/badge/focus-minors'%20consent%20flow-blueviolet?style=flat-square)
@@ -68,17 +73,7 @@ A determined teen can still lie through the soft prompt, and signal-based detect
 
 `Problem` → `User` → `Current Experience` → `Proposed Solution` → `Metrics & Success Criteria` → `Diagnostic Thinking` → `Dashboard` → `Rollout Plan` → `Risks & Trade-offs`
 
-See the [full deck](./YouTube_DPDP_Consent_Deck.pptx) for all of it, including a "north star metric drops 15%" diagnostic scenario and a mock health dashboard.
-
-<br>
-
-## 🛠️ Built with
-
-Structured and built with the help of **Claude (Anthropic)** — used transparently, per the assignment's own AI usage guidelines:
-
-> *"You are welcome to use AI tools... We evaluate your thinking, not your prompts."*
-
-All product decisions and trade-offs are mine to defend.
+See the [full deck](https://drive.google.com/file/d/1HEG81Q-_c09WlB9Om2Xq6aKGqFH7gY9V/view?usp=sharing) for all of it, including a "north star metric drops 15%" diagnostic scenario and a mock health dashboard.
 
 <br>
 
