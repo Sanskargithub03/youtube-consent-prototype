@@ -2,7 +2,7 @@
 
 # 🎬 Designing Consent for Young Viewers on YouTube
 
-### A Product Management Case Study · Vedantu PM Internship
+### A Product Management Case Study · 
 
 **How should YouTube (India) handle personal data and consent for minors,**
 **in line with the Digital Personal Data Protection (DPDP) Act, 2023?**
